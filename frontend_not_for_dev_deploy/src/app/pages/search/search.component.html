@@ -1,0 +1,377 @@
+<div class="row">
+  <div
+    class="col-10 col-lg-6 container-sm mb-10 bg-body border border-2 rounded-5"
+  >
+    <p class="text-center pt-4 fs-5 fw-semibold">Business Search</p>
+    <form action="/search" method="GET" class="container-sm" ngNativeValidate>
+      <div class="row">
+        <div class="mb-3 col-12">
+          <label for="inputKeyword" class="form-label"
+            >Keyword<span class="text-danger"> *</span></label
+          >
+          <input
+            matInput
+            id="inputKeyword"
+            name="keyword"
+            class="form-control"
+            autocomplete="off"
+            [(ngModel)]="keyword"
+            [matAutocomplete]="auto"
+            [formControl]="myCtrl"
+            required
+          />
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngIf="isLoading" class="is-loading"
+              ><mat-spinner [diameter]="25"></mat-spinner
+            ></mat-option>
+            <ng-container *ngIf="!isLoading">
+              <mat-option
+                *ngFor="let option of filteredKeywords"
+                [value]="option"
+              >
+                <span
+                  ><b>{{ option }}</b></span
+                >
+              </mat-option>
+            </ng-container>
+          </mat-autocomplete>
+        </div>
+      </div>
+      <div class="row">
+        <div class="mb-3 col-12 col-sm-6">
+          <label for="inputDistance" class="form-label">Distance</label>
+          <input
+            type="text"
+            id="inputDistance"
+            name="distance"
+            placeholder="10"
+            class="form-control"
+            autocomplete="off"
+            [(ngModel)]="distance"
+          />
+        </div>
+        <div class="mb-3 col-11 col-sm-5">
+          <label for="inputCategory" class="form-label"
+            >Category<span class="text-danger"> *</span></label
+          >
+          <select
+            id="inputCategory"
+            name="category"
+            class="form-select"
+            [(ngModel)]="category"
+            required
+          >
+            <option value="default" selected>Default</option>
+            <option value="arts and entertainment">Arts & Entertainment</option>
+            <option value="health and medical">Health & Medical</option>
+            <option value="hotels and travel">Hotels & Travel</option>
+            <option value="food">Food</option>
+            <option value="professional services">Professional Services</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="mb-3 col-sm-12">
+          <label for="inputLocation" name="location" class="form-label"
+            >Location<span class="text-danger"> *</span></label
+          >
+          <input
+            type="text"
+            id="inputLocation"
+            name="location"
+            class="form-control"
+            [disabled]="checkbox == true"
+            autocomplete="off"
+            [(ngModel)]="location"
+            required
+          />
+        </div>
+      </div>
+      <div class="form-check mb-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="checkbox"
+          value=""
+          id="flexCheckDefault"
+          (click)="getGeolocationByIpinfo()"
+          [(ngModel)]="checkbox"
+        />
+        <label class="form-check-label" for="flexCheckDefault">
+          Auto-detect my location
+        </label>
+      </div>
+      <div class="row pb-5">
+        <div class="col-6 d-flex flex-row-reverse">
+          <button
+            class="btn btn-danger"
+            (click)="onSubmit()"
+            href="#resultTable"
+          >
+            Submit
+          </button>
+        </div>
+        <div class="col-6">
+          <button type="button" class="btn btn-primary" (click)="clearForm()">
+            Clear
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div *ngIf="!hasResults" class="d-flex justify-content-center mt-5">
+  <span class="text-center text-danger fw-semibold bg-body px-5 rounded-4">
+    No results available
+  </span>
+</div>
+<div class="d-flex justify-content-center">
+  <div class="container-sm">
+    <table
+      *ngIf="hasResults && searchResults"
+      id="resultTable"
+      class="table table-striped bg-body rounded-4 mt-5"
+      [hidden]="businessDetails"
+    >
+      <thead>
+        <tr class="text-center">
+          <th scope="col">#</th>
+          <th scope="col">Image</th>
+          <th scope="col">Business Name</th>
+          <th scope="col">Rating</th>
+          <th scope="col">Distance (miles)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let res of searchResults; let i = index"
+          value="res"
+          class="text-center"
+          (click)="onTableRow(res[0])"
+          role="button"
+        >
+          <th scope="row">{{ i + 1 }}</th>
+          <td>
+            <img
+              src="{{ res[1].image_url }}"
+              height="100px"
+              width="100px"
+              alt="Business Image"
+            />
+          </td>
+          <td>{{ res[1].name }}</td>
+          <td>{{ res[1].rating }}</td>
+          <td>{{ res[1].distance }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="pb-4 row">
+  <div
+    *ngIf="businessDetails"
+    value="businessDetails;reviewsDetails"
+    class="col-10 col-lg-7 container-sm bg-body rounded-4 mt-5"
+  >
+    <span
+      class="fs-5"
+      role="button"
+      (click)="businessDetails = undefined"
+      href="#resultTable"
+      >&larr;</span
+    >
+    <h2 class="text-center">{{ businessDetails.name }}</h2>
+    <app-reserve
+      [modalName]="businessDetails.name"
+      [id]="businessDetails.id"
+    ></app-reserve>
+    <mat-tab-group
+      mat-align-tabs="center"
+      color="primary"
+      backgroundColor="accent"
+      animationDuration="0ms"
+    >
+      <mat-tab label="Business Details">
+        <div class="container text-center">
+          <div class="row">
+            <div
+              *ngIf="
+                businessDetails.location.display_address != undefined &&
+                businessDetails.location.display_address.length != 0
+              "
+              class="col-12 col-lg-6 mt-4"
+            >
+              <h5 class="fw-semibold">Address</h5>
+              <span
+                *ngFor="let line of businessDetails.location.display_address"
+                value="line"
+              >
+                <span>{{ line }} </span>
+              </span>
+            </div>
+            <div
+              *ngIf="
+                businessDetails.categories != undefined &&
+                businessDetails.categories.length != 0
+              "
+              class="col-12 col-lg-6 mt-4"
+            >
+              <h5 class="fw-semibold">Category</h5>
+
+              <span
+                *ngFor="let c of businessDetails.categories; last as isLast"
+                value="c"
+                ><span *ngIf="!isLast">{{ c.title }} | </span
+                ><span *ngIf="isLast">{{ c.title }}</span>
+              </span>
+            </div>
+            <div class="col-12 col-lg-6 mt-4">
+              <h5 class="fw-semibold">Phone</h5>
+              <p
+                *ngIf="
+                  businessDetails.display_phone != undefined &&
+                  businessDetails.display_phone.length != 0
+                "
+              >
+                {{ businessDetails.display_phone }}
+              </p>
+            </div>
+            <div class="col-12 col-lg-6 mt-4">
+              <h5 class="fw-semibold">Price Range</h5>
+              <p *ngIf="businessDetails.price != undefined">
+                {{ businessDetails.price }}
+              </p>
+            </div>
+            <div
+              *ngIf="!businessDetails.is_closed"
+              class="col-12 col-lg-6 mt-4"
+            >
+              <h5 class="fw-semibold">Status</h5>
+              <p class="text-success">Open Now</p>
+            </div>
+            <div *ngIf="businessDetails.is_closed" class="col-12 col-lg-6 mt-4">
+              <h5 class="fw-semibold">Status</h5>
+              <p class="text-danger">Closed</p>
+            </div>
+            <div class="col-12 col-lg-6 mt-4">
+              <h5 class="fw-semibold">Visit yelp for more</h5>
+              <a
+                *ngIf="
+                  businessDetails.url != undefined &&
+                  businessDetails.url.length != 0
+                "
+                href="{{ businessDetails.url }}"
+                target="_blank"
+                >Business link</a
+              >
+            </div>
+          </div>
+        </div>
+        <!-- Button Trigger Reservation Form Modal -->
+        <div
+          *ngIf="!database.getItem(businessDetails.id)"
+          class="d-flex justify-content-center"
+        >
+          <button
+            class="btn btn-danger mt-2"
+            data-bs-toggle="modal"
+            data-bs-target="#reservationFormModal"
+          >
+            Reserve Now
+          </button>
+        </div>
+        <div
+          *ngIf="database.getItem(businessDetails.id)"
+          class="d-flex justify-content-center"
+        >
+          <button
+            class="btn btn-primary mt-2"
+            (click)="cancelReservation(businessDetails.id)"
+          >
+            Cancel Reservation
+          </button>
+        </div>
+        <!-- Reservation Form Modal -->
+        <p class="text-center mt-4">
+          Share on:
+          <a role="button" href="{{ tweetShareLink }}" target="_blank"
+            ><i class="mx-1 bi bi-twitter text-primary fs-4"></i
+          ></a>
+          <a role="button" href="{{ facebookShareLink }}" target="_blank">
+            <i class="mx-1 bi bi-facebook text-primary fs-4"></i
+          ></a>
+        </p>
+        <div
+          id="businessCarousel"
+          class="mb-2 carousel carousel-dark slide"
+          data-bs-ride="carousel"
+        >
+          <div class="carousel-inner">
+            <div class="carousel-item active" data-bs-interval="2000">
+              <div class="row">
+                <img
+                  src="{{ businessDetails.photos[0] }}"
+                  alt=""
+                  class="mx-auto d-block col-12 col-lg-5"
+                />
+              </div>
+            </div>
+            <div
+              *ngFor="let img of businessDetails.photos.slice(1)"
+              class="carousel-item"
+              value="img"
+              data-bs-interval="2000"
+            >
+              <div class="row">
+                <img
+                  src="{{ img }}"
+                  alt=""
+                  class="mx-auto d-block col-12 col-lg-5"
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            class="carousel-control-prev"
+            type="button"
+            data-bs-target="#businessCarousel"
+            data-bs-slide="prev"
+          >
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button
+            class="carousel-control-next"
+            type="button"
+            data-bs-target="#businessCarousel"
+            data-bs-slide="next"
+          >
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+      </mat-tab>
+      <mat-tab label="Map location">
+        <div style="width: 100%; height: 450px">
+          <google-map width="100%" height="100%" [options]="mapOptions">
+            <map-marker [position]="marker.position"></map-marker>
+          </google-map>
+        </div>
+      </mat-tab>
+      <mat-tab label="Reviews">
+        <table class="table table-striped bg-body">
+          <tbody>
+            <tr *ngFor="let review of reviewsDetails" value="review">
+              <td>
+                <p class="fw-semibold">{{ review.user.name }}</p>
+                <p>Rating: {{ review.rating }}/5</p>
+                <br />
+                <p>{{ review.text }}</p>
+                <br />
+                <p>{{ review.time_created.split(" ")[0] }}</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

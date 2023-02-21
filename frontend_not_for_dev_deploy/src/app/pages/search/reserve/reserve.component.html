@@ -1,0 +1,179 @@
+<div class="modal fade" id="reservationFormModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Reservation form</h1>
+      </div>
+      <div class="modal-body">
+        <p class="text-center fw-seminold fs-6">{{ modalName }}</p>
+        <form class="row g-3 needs-validation">
+          <!-- Email Input -->
+          <div class="col-12">
+            <label for="inputEmail" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="inputEmail"
+              [(ngModel)]="email"
+              name="email"
+              autocomplete="off"
+              (keyup)="validate(EMAIL_PATTERN)"
+              required
+            />
+            <div class="invalid-feedback">
+              <span *ngIf="email.length == 0">Email is required</span>
+              <span *ngIf="email.length > 0 && !isEmailValid"
+                >Email must be a valid email address</span
+              >
+            </div>
+          </div>
+          <!-- Date Input -->
+          <div class="col-12">
+            <label for="inputDate" class="form-label">Date</label>
+            <input
+              type="date"
+              min="{{ getToday() }}"
+              class="form-control"
+              id="inputDate"
+              [(ngModel)]="date"
+              name="date"
+              autocomplete="off"
+              required
+            />
+            <div class="invalid-feedback">Date is required</div>
+          </div>
+          <!-- Time input: -->
+          <label class="form-label" for="inputTime">Time</label>
+          <div
+            id="inputTime"
+            class="col-7 d-flex justify-content-between align-items-center"
+          >
+            <div class="dropdown">
+              <input
+                type="text"
+                class="form-control dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                name="hour"
+                [(ngModel)]="hour"
+                required
+              />
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" role="button" (click)="setHour('10')"
+                    >10</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" role="button" (click)="setHour('11')"
+                    >11</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" role="button" (click)="setHour('12')"
+                    >12</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" role="button" (click)="setHour('13')"
+                    >13</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" role="button" (click)="setHour('14')"
+                    >14</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" role="button" (click)="setHour('15')"
+                    >15</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" role="button" (click)="setHour('16')"
+                    >16</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" role="button" (click)="setHour('17')"
+                    >17</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <span readonly class="text-center px-1"> : </span>
+            <div class="dropdown">
+              <input
+                type="text"
+                class="form-control dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                name="minute"
+                [(ngModel)]="minute"
+                required
+              />
+              <ul class="dropdown-menu">
+                <li>
+                  <a
+                    class="dropdown-item"
+                    role="button"
+                    (click)="setMinute('00')"
+                    >00</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    role="button"
+                    (click)="setMinute('15')"
+                    >15</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    role="button"
+                    (click)="setMinute('30')"
+                    >30</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    role="button"
+                    (click)="setMinute('45')"
+                    >45</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <span readonly class="text-center px-1"
+              ><i class="bi bi-clock"></i
+            ></span>
+          </div>
+          <!-- Submit -->
+          <div class="col-12 d-flex justify-content-center">
+            <button
+              class="btn btn-danger"
+              type="submit"
+              (click)="onSubmit($event)"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          #close
+          type="button"
+          class="btn btn-dark"
+          (click)="clearForm()"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

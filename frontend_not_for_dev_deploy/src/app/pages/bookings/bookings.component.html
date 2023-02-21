@@ -1,0 +1,38 @@
+<div *ngIf="database.length == 0" class="d-flex justify-content-center">
+  <span class="text-center text-danger fw-semibold bg-body px-2 rounded-4">
+    No reservations to show
+  </span>
+</div>
+<div *ngIf="database.length != 0" class="row">
+  <h4 class="text-center mb-4 col-12">List of your reservations</h4>
+  <div class="container col-12 col-lg-7 table-responsive">
+    <table class="table bg-body rounded-4">
+      <thead>
+        <tr>
+          <th scope="col" class="text-center">#</th>
+          <th scope="col" class="text-center">Business Name</th>
+          <th scope="col" class="text-center">Date</th>
+          <th scope="col" class="text-center">Time</th>
+          <th scope="col" class="text-center">E-mail</th>
+          <th scope="col" class="text-center"><span> </span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of database; let i = index">
+          <th scope="row" class="text-center">{{ i + 1 }}</th>
+          <td class="text-center">{{ data[1][0].business_name }}</td>
+          <td class="text-center">{{ data[1][0].date }}</td>
+          <td class="text-center">{{ data[1][0].time }}</td>
+          <td class="text-center">{{ data[1][0].email }}</td>
+          <td class="text-center">
+            <i
+              class="bi bi-trash"
+              role="button"
+              (click)="cancelReservation(data[0])"
+            ></i>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
